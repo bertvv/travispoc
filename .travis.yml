@@ -1,0 +1,32 @@
+sudo: required
+env:
+  - OS_TYPE=centos OS_VERSION=7 ANSIBLE_VERSION=1.9.4
+
+branches:
+  only:
+    - tests
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get update
+    #- echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
+    #- sudo service docker restart
+    #- sleep 5
+  - sudo docker pull ${OS_TYPE}:${OS_VERSION}
+  # Build container
+  - sudo docker build --rm=true -t travispoc .
+
+script:
+  # Run container in detached state
+  - sudo docker run --detach --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro travispoc /usr/lib/systemd/systemd > /tmp/container_id
+  # Check syntax of ansible playbook
+  - sudo docker exec "$(cat /tmp/container_id)" ansible-playbook /etc/ansible/test.yml --syntax-check
+  # Run ansible playbook
+  - sudo docker exec "$(cat /tmp/container_id)" ansible-playbook /etc/ansible/test.yml
+  # Clean up
+  - sudo docker stop "$(cat /tmp/container_id)"
+
+notifications:
+  email: false
