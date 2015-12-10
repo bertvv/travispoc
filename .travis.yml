@@ -2,10 +2,6 @@ sudo: required
 env:
   - OS_TYPE=centos OS_VERSION=7 ANSIBLE_VERSION=1.9.4
 
-branches:
-  only:
-    - tests
-
 services:
   - docker
 
