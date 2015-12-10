@@ -1,6 +1,6 @@
 # Proof-of-concept Travis + CentOS + Ansible
 
-[![Build Status](https://travis-ci.org/bertvv/travis-poc.svg?branch=master)](https://travis-ci.org/bertvv/travis-poc)
+[![Build Status](https://travis-ci.org/bertvv/travispoc.svg?branch=master)](https://travis-ci.org/bertvv/travispoc)
 
 Proof-of-concept for testing Ansible on CentOS hosts with Travis-CI.
 
