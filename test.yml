@@ -1,5 +1,4 @@
 ---
 - hosts: all
-  sudo: true
   roles:
-    - bertvv.httpd
+    - ansible-role-apache
