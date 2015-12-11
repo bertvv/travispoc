@@ -1,6 +1,6 @@
 sudo: required
 env:
-  - OS_TYPE=centos OS_VERSION=7 ANSIBLE_VERSION=1.9.4
+  - CONTAINER_ID=$(mktemp)
 
 services:
   - docker
@@ -11,28 +11,27 @@ before_install:
   - sudo docker pull centos:7
   - sudo docker pull ubuntu:14.04
   # Customize containers
-  - sudo docker build --rm=true --file=Dockerfile.centos --tag=travis/centos:ansible .
-  - sudo docker build --rm=true --file=Dockerfile.ubuntu --tag=travis/ubuntu:ansible .
+  - sudo docker build --rm=true --file=Dockerfile.centos --tag=centos:ansible .
+  - sudo docker build --rm=true --file=Dockerfile.ubuntu --tag=ubuntu:ansible .
 
 script:
   #
   # Run test playbook on Ubuntu container
   #
-  - sudo docker run travis/ubuntu:ansible ansible-playbook /etc/ansible/test.yml --syntax-check
-  - sudo docker run travis/ubuntu:ansible ansible-playbook /etc/ansible/test.yml
+  - sudo docker run ubuntu:ansible ansible-playbook /etc/ansible/test.yml --syntax-check
+  - sudo docker run ubuntu:ansible ansible-playbook /etc/ansible/test.yml
 
   #
   # Run test playbook on CentOS container
   #
 
   # Run container in detached state
-  - sudo docker run --detach --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro \
-    travis/centos:ansible /usr/lib/systemd/systemd > /tmp/container_id
+  - sudo docker run --detach --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro centos:ansible /usr/lib/systemd/systemd > "${CONTAINER_ID}"
 
-  - sudo docker exec "$(cat /tmp/container_id)" ansible-playbook /etc/ansible/test.yml --syntax-check
-  - sudo docker exec "$(cat /tmp/container_id)" ansible-playbook /etc/ansible/test.yml
+  - sudo docker exec "$(cat ${CONTAINER_ID})" ansible-playbook /etc/ansible/test.yml --syntax-check
+  - sudo docker exec "$(cat ${CONTAINER_ID})" ansible-playbook /etc/ansible/test.yml
   # Clean up
-  - sudo docker stop "$(cat /tmp/container_id)"
+  - sudo docker stop "$(cat ${CONTAINER_ID})"
 
 notifications:
   email: false
